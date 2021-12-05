@@ -1,0 +1,94 @@
+﻿@model CycleAnalytics;
+@using System.Globalization;
+@{
+    ViewData["Title"] = "CycleAnalytics";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Cycle Analytics</h1>
+<div class="cellContainer">
+    <div class="cellHeader">ticker</div>
+    <div class="cellContainer">
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+    </div>
+    <hr />
+    <div class="cellHeader">ticker</div>
+    <div class="cellContainer">
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+        <div class="cell">cell</div>
+    </div>
+    <hr />
+</div>
+<div style="width:inherit;height:auto;margin:0px auto;float:none;overflow:hidden;overflow-wrap:anywhere;">
+    <br />
+    <div class="text-body border">
+        <h1>WatchList</h1>
+    </div>
+    <br />
+    <div class="text-body border">
+        @foreach (var items in Model.watchlist)
+        {
+            //@Html.Raw("<b>" + items + "</b>")
+            @Html.Raw("<b>Name: </b>" + items.name + "<br>")
+            <b><font color="blue">Symbols: </font></b>
+            foreach (var item in items.watchListItems)
+            {
+                //@Html.Raw(item.instrument.symbol + "&nbsp;,");
+                @Html.Raw("<a href=\"javascript:TMDobject.Search('" + item.instrument.symbol + "')\">" + item.instrument.symbol + "</a>&nbsp;,");
+                //@Html.Raw("<b>" + item + ": </b>" + items.watchlistItems[item] + "<br>")
+            }
+            <hr />
+        }
+    </div>
+</div>
+<div style="width:inherit;height:auto;margin:0px auto;float:none;overflow:hidden;overflow-wrap:anywhere;">
+    <br />
+    <div class="text-body border">
+        <h1>Orders</h1>
+    </div>
+    <br />
+    <div class="text-body border">
+
+            @foreach (var item in Model.orders)
+            {
+                @Html.Raw("<b>session : </b>-" + item.session + "<br>");
+                @Html.Raw("<b>duration : </b>-" + item.duration + "<br>");
+                @Html.Raw("<b>orderType : </b>-" + item.orderType + "<br>");
+                @Html.Raw("<b>complexOrderStrategyType : </b>-" + item.complexOrderStrategyType + "<br>");
+                @Html.Raw("<b>quantity : </b>-" + item.quantity + "<br>");
+
+                @Html.Raw("<b>filledQuantity : </b>-" + item.filledQuantity + "<br>");
+                @Html.Raw("<b>remainingQuantity : </b>-" + item.remainingQuantity + "<br>");
+                @Html.Raw("<b>requestedDestination : </b>-" + item.requestedDestination + "<br>");
+                @Html.Raw("<b>destinationLinkName : </b>-" + item.destinationLinkName + "<br>");
+                @Html.Raw("<b>price : </b>-" + item.price + "<br>");
+
+                @Html.Raw("<b>symbol : </b>-" + item.orderLegCollection[0].instrument.symbol + "<br>");
+                @Html.Raw("<b>instruction : </b>-" + item.orderLegCollection[0].instruction + "<br>");
+                @Html.Raw("<b>quantity : </b>-" + item.orderLegCollection[0].quantity + "<hr>");
+
+            }
+        </div>
+    </div>
+
+
+    @*@foreach (var item in Model.watchlist)
+    {
+        @Html.Raw(item);
+    }*@
+

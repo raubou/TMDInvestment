@@ -1,0 +1,154 @@
+﻿@model TMDInvestment.Models.AccountInfo
+@using Microsoft.AspNetCore.Mvc.ModelBinding;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4>Account Settings</h4>
+<br />
+@if (!ViewData.ModelState.IsValid)
+{
+    IEnumerable<ModelError> allErrors = ViewData.ModelState.Values.SelectMany(v => v.Errors);
+    foreach (var error in allErrors)
+    {
+        <div style="color:red">@error</div>
+    }
+}
+@if (ViewBag.errors != null)
+{
+    <div style="color:red">@ViewBag.errors</div>
+}
+<div id="accountInfo" class="container">
+    <form id="AuthSettings" method="post" enctype="multipart/form-data" asp-controller="Account" asp-action="Index">
+        <div asp-validation-summary="ModelOnly" class="text-danger" data-></div>
+        <div class="row row-cols-2">
+            <div class="col col_Left">
+                <input type="submit" id="" value="Save Changes" class="btn btn-primary" />
+            </div>
+            <div class="col"></div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <label for="UseDayTrade" class="col-form-label">Allow Day Trading</label><br />
+                    <input type="radio" asp-for="UseDayTrade" value="True" name="UseDayTrade" class="custom-radio" /> Yes
+                    <input type="radio" asp-for="UseDayTrade" value="False" name="UseDayTrade" class="custom-radio" /> No
+                    <span asp-validation-for="UseDayTrade" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="form-group">
+                    <label for="UseSwingTrade" class="col-form-label">Allow Swing Trade</label><br />
+                    <input type="radio" asp-for="UseSwingTrade" value="True" name="UseSwingTrade" class="custom-radio" /> Yes
+                    <input type="radio" asp-for="UseSwingTrade" value="False" name="UseSwingTrade" class="custom-radio" /> No
+                    <span asp-validation-for="UseSwingTrade" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <label for="HistoryDayRange" class="col-form-label">Number of days in History</label>
+                    <input type="number" asp-for="HistoryDayRange" value="@Model.HistoryDayRange" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="HistoryDayRange" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="HistoryIntervalRange" class="col-form-label">Interval in a Day in Minutes</label>
+                    <input type="number" asp-for="HistoryIntervalRange" value="@Model.HistoryIntervalRange" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="HistoryIntervalRange" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <label for="PercentBalanceUse" class="col-form-label">Percent of balance to use</label>
+                    <input type="number" asp-for="PercentBalanceUse" value="@Model.PercentBalanceUse" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="PercentBalanceUse" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="PriceRangeMin" class="col-form-label">Min Price Range for Stock</label>
+                    <input type="number" asp-for="PriceRangeMin" value="@Model.PriceRangeMin" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="PriceRangeMin" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <label for="PriceRangeMax" class="col-form-label">Max Price Rang for Stock</label>
+                    <input type="number" asp-for="PriceRangeMax" value="@Model.PriceRangeMax" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="PriceRangeMax" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="PercentRangeLow" class="col-form-label">Min Range for Stock move Up</label>
+                    <input type="number" asp-for="PercentRangeLow" value="@Model.PercentRangeLow" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="PercentRangeLow" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <label for="PercentRangeHigh" class="col-form-label">Min Range for Stock move Down</label>
+                    <input type="number" asp-for="PercentRangeHigh" value="@Model.PercentRangeHigh" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="PercentRangeHigh" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="SqueezeRangeLow" class="col-form-label">Min Range for Stock Range Squeeze</label>
+                    <input type="number" asp-for="SqueezeRangeLow" value="@Model.SqueezeRangeLow" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="SqueezeRangeLow" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <label for="SqueezeRangeHigh" class="col-form-label">Max Range for Stock Range Squeeze</label>
+                    <input type="number" asp-for="SqueezeRangeHigh" value="@Model.SqueezeRangeHigh" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="SqueezeRangeHigh" class="text-danger"></span>
+                    @*<input type="hidden" asp-for="UserId" />*@
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="SqueezeRangeHigh" class="col-form-label">Min Range for Volume</label>
+                    <input type="number" asp-for="VolumeRangeLow" value="@Model.VolumeRangeLow" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="VolumeRangeLow" class="text-danger"></span>
+                    @*<input type="hidden" asp-for="UserId" />*@
+                </div>
+            </div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <label for="SqueezeRangeHigh" class="col-form-label">Max Range for Volume</label>
+                    <input type="number" asp-for="VolumeRangeHigh" value="@Model.VolumeRangeHigh" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="VolumeRangeHigh" class="text-danger"></span>
+                    @*<input type="hidden" asp-for="UserId" />*@
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="MaxHoldforStock" class="col-form-label">Max Hold time for a Stock</label>
+                    <input type="number" asp-for="MaxHoldforStock" value="@Model.MaxHoldforStock" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="MaxHoldforStock" class="text-danger"></span>
+                    @*<input type="hidden" asp-for="UserId" />*@
+                </div>
+            </div>
+            <div class="col align-content-lg-center">
+                <div class="form-group">
+                    <label for="MaxHoldforStock" class="col-form-label">Max Round Trades Per Day</label>
+                    <input type="number" asp-for="MaxRoundTradesPerDay" value="@Model.MaxRoundTradesPerDay" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="MaxRoundTradesPerDay" class="text-danger"></span>
+                    <input type="hidden" asp-for="UserId" />
+                </div>
+            </div>
+            <div class="col col_Left">
+                <div class="form-group">
+                    <input type="submit" id="" value="Save Changes" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
+

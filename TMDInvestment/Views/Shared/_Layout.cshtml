@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TMDInvestment</title>
+    @*<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />*@
+    <link rel="stylesheet" href="~/lib/bootstrap5.02/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    @*<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>*@
+    <script src="~/lib/bootstrap5.02/js/bootstrap.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @*<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>*@
+    @RenderSection("Scripts", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <div style="width: auto; height: 40px; overflow: hidden; margin: 0px auto; position: relative; top: 0px; left: 0px;">
+                    <img src="~/assets/images/Logo2AvatarAlpha 380x280.png" height="40" title="TMDInvestments" alt="TMDInvestments" />
+                </div>
+                <div style="width: auto; height: 40px; overflow: hidden; margin: 0px auto; position: relative; top: 4px; left: 4px;">
+                    <a class="navbar-brand" asp-area="" asp-controller="Default" asp-action="Index">TMDInvestment</a>
+                </div>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>*@
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Movers">Movers</a>
+                        </li>
+                        <li class="nav-item">
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        <!--<li class="nav-item">-->
+                        @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                        <!--<a class="nav-link" asp-area="" asp-controller="Auth" asp-action="Authorize">Authorize TD Ameritrade API</a>
+    </li>-->
+                        <li class="nav-item">
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                            <a class="nav-link" asp-area="" asp-controller="Auth" asp-action="Account">Account Info</a>
+                        </li>
+                        <li class="nav-item">
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="CoinBaseAccount">Coin Base Info</a>
+                        </li>
+                        <li class="nav-item">
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                            <a class="nav-link" asp-area="" asp-controller="Auth" asp-action="WatchList">WatchList</a>
+                        </li>
+                        <!--<li class="nav-item">-->
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                            <!--<a class="nav-link" asp-area="" asp-controller="Auth" asp-action="CycleAnalytics">Cycle Analytics</a>
+                        </li>-->
+                        <li class="nav-item">
+                            <div class="border-right"></div>
+                        </li>
+                        <li class="nav-item">
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Index" asp-route-id="1">Account Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Coins">Coins</a>
+                        </li>
+                        <li class="nav-item">
+                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <div class="input-group rounded">
+                                <input id="txtSearch" type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                                       aria-describedby="search-addon" autocomplete="off" />
+                                <span class="input-group-text border-0" id="search-addon">
+                                    <i class="fa fa-search" onclick="TMDobject.Search($('#txtSearch').val())"></i>
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container containerBody">
+        <main role="main" class="pb-3">
+            <div class="text-center">
+                @*<h1 class="display-4">Welcome</h1>
+                    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
+                @*<div class="input-group rounded">
+                        <input id="txtSearch" type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                               aria-describedby="search-addon" autocomplete="off" />
+                        <span class="input-group-text border-0" id="search-addon">
+                            <i class="fa fa-search" onclick="TMDobject.Search($('#txtSearch').val())"></i>
+                        </span>
+                    </div>*@
+            </div>
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; @DateTime.Now.Year.ToString() - TMDInvestment - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <div id="infoWindow">
+        <div id="infoHeader" style="width:99%;height:auto;margin:0px auto;float:none;text-align:center;padding-bottom:7px;">
+            <button id="btnClose" value="OK" class="btn-sm-blue" onclick="TMDobject.closeItem($(this).parent().parent())">Close</button>
+        </div>
+        <div id="infoTitle" style="width: 99%; height: auto; margin: 0px auto; float: none; text-align: center; font-weight: bold; font-size: 17px;"></div>
+        <div id="infoWindowText" style="width:99%;height:420px;margin:0px auto;float:none;overflow:hidden;overflow-x:hidden;overflow-y:auto;"></div>
+    </div>
+    <div id="InfoWindow2" style="width: 50%; height: 50%; margin: 0px auto; float: none; overflow: hidden; background-color: #ffffff; border-radius: 2px; position: fixed; top: 25%; left: 25%; z-index: 999999; border: 1px solid #cacaca;display:none;">
+        @{
+            await Html.RenderPartialAsync("~/Views/Partial/Detail.cshtml");
+        }
+    </div>
+    @*@section Scripts {
+            @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+        }*@
+</body>
+</html>

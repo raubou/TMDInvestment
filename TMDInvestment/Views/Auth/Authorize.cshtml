@@ -1,0 +1,12 @@
+﻿@model dynamic
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{ 
+    ViewData["Title"] = "Authorize";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        window.location.href = "https://auth.tdameritrade.com/auth?response_type=code&redirect_uri=http://localhost:50735/auth/code&client_id=AAYVAX3S39IAZW4VNNRP0JZVJOLTNXQI@AMER.OAUTHAP";
+    })
+</script>

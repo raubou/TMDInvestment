@@ -1,0 +1,104 @@
+﻿@using System.Reflection;
+@model dynamic;
+@{
+    ViewData["Title"] = "CoinBaseAccount";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Coin Base Account</h1>
+
+<div class="text-body-fixed-49-390">
+    <h4>Account Balances</h4>
+    @foreach (var accountItem in Model.Accounts)
+    {
+        decimal balance = 0;
+        try
+        {
+            balance = Convert.ToDecimal(accountItem.GetType().GetProperty("balance").GetValue(accountItem, null).ToString());
+        }
+        catch (Exception ex)
+        {
+
+        }
+        if (balance > 0)
+        {
+            @foreach (PropertyInfo item in accountItem.GetType().GetProperties())
+            {
+                if (item.Name == "ticker")
+                {
+                    var tickerItem = item.GetValue(accountItem, null);
+                    @Html.Raw("<br><h4>Ticker</h4>")
+                    @Html.Raw("<b>" + item.Name + ": </b>" + tickerItem?.price + "<br>")
+                }
+                @*else if (item.Name == "trades")
+                {
+                    var tradeItem = item.GetValue(accountItem, null);
+                    @Html.Raw("<br><h4>Trades</h4>")
+                    @Html.Raw("<b>" + item.Name + ": </b>" + tradeItem?.price + "<br>")
+                }*@
+                else
+                {
+                    @Html.Raw("<b>" + item.Name + ": </b>" + item.GetValue(accountItem, null) + "<br>")
+                }
+
+
+            }
+        }
+        <hr />
+    }
+</div>
+<div class="text-body-fixed-49-390">
+    <h4>Availiable Products</h4>
+    @foreach (var productItem in Model.Products)
+    {
+        @foreach (PropertyInfo item in productItem.GetType().GetProperties())
+        {
+            if (item.Name == "ticker")
+            {
+                var tickerItem = item.GetValue(productItem, null);
+                @Html.Raw("<br><h4>Ticker</h4>")
+                @Html.Raw("<b>" + item.Name + ": </b>" + tickerItem?.price + "<br>")
+            }
+            else
+            {
+                @Html.Raw("<b>" + item.Name + ": </b>" + item.GetValue(productItem, null) + "<br>")
+            }
+        }
+        <hr />
+    }
+</div>
+<br />
+<div class="text-body-fixed-49-390">
+
+    <h4> Orders </h4>
+    @foreach (var order in Model.Orders)
+    {
+        @foreach (PropertyInfo item in order.GetType().GetProperties())
+        {
+            @if (item.Name == "fills")
+            {
+                var fills = (List<Fills>)item.GetValue(order, null);
+                if (fills != null)
+                {
+                    @Html.Raw("<br><h4>Fills</h4>")
+                    foreach (var fill in fills)
+                    {
+                        foreach (PropertyInfo fillItem in fill.GetType().GetProperties())
+                        {
+                            @Html.Raw("<b>" + fillItem.Name + ": </b>" + fillItem.GetValue(fill, null) + "<br>")
+                        }
+                        @*<hr />*@
+                    }
+                }
+            }
+            else
+            {
+                @Html.Raw("<b>" + item.Name + ": </b>" + item.GetValue(order, null) + "<br>")
+            }
+            @*<hr />*@
+        }
+        <hr />
+    }
+</div>
+
+

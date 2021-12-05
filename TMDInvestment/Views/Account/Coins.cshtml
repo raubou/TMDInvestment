@@ -1,0 +1,82 @@
+﻿@model TMDInvestment.Models.Coins
+
+@{
+    ViewData["Title"] = "Coins";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var cryptoList = (List<TMDInvestment.Models.Coins>)ViewBag.CryptoProducts;
+}
+<div class="container">
+    <form id="AuthSettings" method="post" enctype="multipart/form-data" asp-controller="Account" asp-action="Coins">
+        <div asp-validation-summary="ModelOnly" class="text-danger" data-></div>
+        <div class="row">
+            <div class="col col_Left">
+                <input type="submit" id="" value="Add Coin" class="btn btn-primary btn-sm" />
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col">
+                <div class="form-control">
+                    <label for="HistoryDayRange" class="col-form-label">Coin</label>
+                    <input type="text" asp-for="Coin" value="@Model.Coin" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="Coin" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-control">
+                    <label for="HistoryDayRange" class="col-form-label">Description</label>
+                    <input type="text" asp-for="Description" value="@Model.Description" placeholder="" class="form-control form-text" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col col_Left">
+                <input type="submit" id="" value="Add Coin" class="btn btn-primary btn-sm" />
+            </div>
+        </div>
+    </form>
+    <br />
+    @if (cryptoList != null)
+    {
+        <div class="row">
+            <div class="col text-center font-weight-bold text-light bg-dark">Coin</div>
+            <div class="col text-center font-weight-bold text-light bg-dark">Description</div>
+            <div class="col text-center font-weight-bold text-light bg-dark">Date Created</div>
+            <div class="col text-center font-weight-bold text-light bg-dark"></div>
+            <div class="col text-center font-weight-bold text-light bg-dark"></div>
+        </div>
+        foreach (var item in cryptoList)
+        {
+            <div class="row">
+                @*<div class="col">@item.Id</div>*@
+                <div class="col text-center border"><input type="text" id="txtUpdateCoin_@item.Id" value="@item.Coin" class="form-control form-text" /></div>
+                <div class="col text-center border"><input type="text" id="txtUpdateDesc_@item.Id" value="@item.Description" class="form-control form-text" /></div>
+                <div class="col text-center border">@item.DateCreated.ToShortDateString()</div>
+                <div class="col text-center border">
+                    @Html.ActionLink("Delete", "DeleteCoin", "Account", new { Id = item.Id }, new { @class = "btn btn-success btn-sm" })
+                </div>
+                <div class="col text-center border">
+                    <button class="btn btn-danger btn-sm" onclick="UpdateCoin(@item.Id)">Update</button>
+                    @*@Html.ActionLink("Update", "UpdateCoin", "Account", new { Id = item.Id, coin = item.Coin }, new { @class = "btn btn-success btn-sm" })*@
+
+                </div>
+            </div>
+        }
+    }
+
+
+</div>
+<script type="text/javascript">
+    function UpdateCoin(id) {
+        //alert("#txtUpdateCoin_" + id)
+        //alert($("#txtUpdateCoin_" + id).val())
+        var coin = $("#txtUpdateCoin_" + id).val();
+        var desc = $("#txtUpdateDesc_" + id).val();
+        location.assign('UpdateCoin?id=' + id + '&coin=' + coin + '&desc=' + desc)
+    }
+</script>
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

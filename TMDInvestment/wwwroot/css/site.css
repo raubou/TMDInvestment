@@ -1,0 +1,264 @@
+﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+body {
+    /*background-color: #e3eaef;*/
+    background-color: #f4f6f9;
+    color: #232b2b !important;
+    font-family: verdana;
+    font-size: 14px;
+}
+::-webkit-scrollbar {
+    width: 11px;
+    height: 16px;
+}
+
+::-webkit-scrollbar-button {
+    width: 0px;
+    height: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1e88e5;
+    border: 1px solid #1e88e5;
+    border-radius: 5px;
+}
+
+
+::-webkit-scrollbar-track {
+    background: #006699;
+    border: 0px none #006699;
+    border-radius: 5px;
+}
+header {
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+    padding: 0;
+    height: 42px;
+    box-shadow: 1px 1px 3px #dee2e6;
+}
+nav {
+    background-image: linear-gradient(to right, #1e88e5, #006699) !important;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    overflow: hidden;
+    margin: 0px;
+    float: none;
+    width: 100%;
+    z-index: 999;
+    overflow: hidden;
+    height: 42px;
+    font-size: 12px;
+}
+
+nav a{
+    color:#fff !important;
+    font-weight:bold;
+}
+
+
+.containerBody {
+    position: relative;
+    margin: 0px auto;
+    float: none;
+    align-items: center;
+    overflow: hidden;
+    width: 80%;
+    height: auto;
+    top: 60px;
+}
+.text-body {
+    border-radius: 4px;
+    box-shadow: 3px 3px 9px #dee2e6;
+    width: 99%;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: #ffffff;
+}
+
+.text-body-fixed-49-390 {
+    width: 49%;
+    height: 390px;
+    margin: 0px auto;
+    float: left;
+    overflow: hidden;
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 3px 3px 9px #dee2e6;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 5px;
+    background-color: #ffffff;
+}
+
+#infoWindow {
+    width: 400px;
+    height: 500px;
+    margin: 0px auto;
+    float: none;
+    overflow: hidden;
+    position: fixed;
+    top: 15%;
+    left: 30%;
+    background-color: #fff;
+    border: 1px solid #cacaca;
+    padding: 15px;
+    display: none;
+    border-radius: 6px;
+    box-shadow: 1px 1px 1px #dee2e6;
+}
+.btn-sm-blue {
+    margin: 0px auto;
+    float: none;
+    width: 100px;
+    color: #fff;
+    border: 0;
+    border-radius: 3px;
+    box-shadow: 2px 2px 2px #dee2e6;
+    background-color: #0dcaf0;
+    text-shadow: 1px 1px #dee2e6;
+}
+.footer {
+    position: absolute;
+    bottom: -50px;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
+}
+a.navbar-brand {
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
+    text-shadow: 0.4px 0.4px 0.4px #dee2e6;
+}
+
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.border-top {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+
+#accountInfo {
+    width:85%;
+    padding: 7px;
+    border: 1px solid #cacaca;
+    border-radius: 6px;
+    box-shadow: 2px 2px 3px #dee2e6;
+}
+
+.col_Left {
+    border-right: 1px solid #cacaca;
+}
+    #accountInfo label{
+/*        width:49%;
+        float:left;*/
+        font-weight: bold;
+    }
+    #accountInfo input[type=text] {
+        width: 50%;
+        float: right;
+    }
+.form-group {
+    width:inherit;
+    height:auto;
+    margin:0px auto;
+    float:none;
+    overflow:hidden;
+/*    padding:5px;*/
+}
+.footer {
+    position: relative;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px; /* Vertically center the text there */
+}
+.cellContainer {
+    width: 100%;
+    height: auto;
+    margin: 0px auto;
+    float: none;
+    overflow: hidden;
+/*    border-right: 1px solid #cacaca;
+    font-size: 11px;
+    padding-left: 3px;*/
+}
+.cellHeader {
+    width: 5%;
+    height: auto;
+    margin: 0px auto;
+    float: left;
+    overflow: hidden;
+    /*border: 1px solid #cacaca;*/
+    font-size: 12px;
+    font-weight:bolder;
+    color:#006699;
+    padding-left: 3px;
+}
+.cell{
+    width:5%;
+    height:35px;
+    margin:0px auto;
+    float:left;
+    overflow:hidden;
+    border:1px solid #cacaca;
+    font-size:11px;
+    padding-left:3px;
+}

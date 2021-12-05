@@ -1,0 +1,44 @@
+﻿@*@using System.Net;*@
+@*@model dynamic;*@
+@{
+    ViewData["Title"] = "Home Page";
+    //string codes = @WebUtility.UrlDecode(ViewBag.response.ToString().Trim());
+    //string[] code = codes.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+    //foreach (var item in Context.Request.Query)
+    //{
+
+    //}
+    //var code = Context.Request.Query["code"];
+}
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<script type="text/javascript">
+    @*var code = '@code';
+    $(document).ready(function () {
+        setTimeout(function () { TMDobject.GetAuthorizationToken(code); },2000);
+    });*@
+</script>
+@{
+    <div style="width:inherit;height:auto;margin:0px auto;float:none;overflow:hidden;overflow-wrap:anywhere;">
+        @*@Html.Raw(WebUtility.UrlDecode(ViewBag.response.ToString()));*@
+        @*@Html.Raw(ViewBag.response.ToString());*@
+        @*@{
+            //foreach (var item in Model[0].securitiesAccount.positions)
+            foreach (var items in Model)
+            {
+                foreach(var item in items.securitiesAccount.positions)
+                {
+                    Html.Raw("<b>Item</b>");
+                    Html.Raw(item);
+                    //Html.Raw(item);
+                    Html.Raw("<br>");
+                }
+            }
+        }
+        @Html.Raw(Model);*@
+        <h4>Token Captured Try your call again</h4>
+    </div>
+    <div id="divAccountInfo" style="width:inherit;height:auto;margin:0px auto;float:none;overflow:hidden;overflow-wrap:anywhere;"></div>
+}

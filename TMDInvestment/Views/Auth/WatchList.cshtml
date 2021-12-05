@@ -1,0 +1,37 @@
+﻿@model dynamic;
+@{
+    ViewData["Title"] = "WatchList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<div style="width:inherit;height:auto;margin:0px auto;float:none;overflow:hidden;overflow-wrap:anywhere;">
+    <br />
+    <div class="text-body border">
+        <h1>WatchList</h1>
+    </div>
+    <br />
+    @*<div class="text-body border">*@
+        @if (Model != null)
+        {
+            @foreach (var items in Model)
+            {
+                <div class="text-danger border-info border">
+                    @Html.Raw("" + items.name + "<br>")
+                </div>
+                <B><font color="blue">Symbols: </font></B><br />
+                foreach (var item in items.watchListItems)
+                {
+                    //@Html.Raw(item.instrument.symbol + "&nbsp;,");
+                    @Html.Raw("<a href=\"javascript:TMDobject.Search('" + item.instrument.symbol + "')\">" + item.instrument.symbol + "</a><br>");
+                    //@Html.Raw("<b>" + item + ": </b>" + items.watchlistItems[item] + "<br>")
+                }
+                <hr />
+            }
+        }
+    @*</div>*@
+</div>
+

@@ -1,0 +1,55 @@
+﻿@model Account;
+@using System.Reflection;
+@{
+    ViewData["Title"] = "Account Info";
+}
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<div style="width:inherit;height:auto;margin:0px auto;float:none;overflow:hidden;overflow-wrap:anywhere;">
+    <br />
+    @*@foreach (var items in Model.Accounts)
+    {*@
+        @*@foreach (var item in items)*@
+<div class="text-body border">
+    <h4>Account Info</h4>
+    <b>Account #: </b>@Model.accountPositions.securitiesAccount.accountId<br />
+    <b>Account Type: </b>@Model.accountPositions.securitiesAccount.type<br />
+    <b>Day Tradable: </b>@Model.accountPositions.securitiesAccount.isDayTrader<br />
+    <b>Day Trade Round Trips: </b>@Model.accountPositions.securitiesAccount.roundTrips<br />
+    <b>Is Closing Only Restricted: </b>@Model.accountPositions.securitiesAccount.isClosingOnlyRestricted<br />
+    <b>Accrued Interest: </b>@Model.accountPositions.securitiesAccount.initialBalances.accruedInterest<br />
+    <b>Available Funds Non Marginable Trade: </b>@Model.accountPositions.securitiesAccount.currentBalances.availableFundsNonMarginableTrade<br />
+</div>
+
+    <br />
+    <div class="text-body border">
+
+        <h4>Positions</h4>
+        @foreach (var item in Model.accountPositions.securitiesAccount.positions)
+        {
+                foreach (PropertyInfo prop in item.GetType().GetProperties())
+                {
+                    if (prop.Name == "Instrument")
+                    {
+                        var Instrument = prop.GetValue(item, null);
+                        @Html.Raw("<b>Symbol: </b>" + ((Instrument)Instrument)?.symbol.ToString() + "<br>")
+                        @*foreach (PropertyInfo inst in prop.GetType().GetProperties())
+                        {
+                            @Html.Raw("<b>" + inst.Name + ": </b>" + inst.GetValue(prop, null) + "<br>")
+                        }*@
+                    }
+                    else
+                    {
+                        @Html.Raw("<b>" + prop.Name + ": </b>" + prop.GetValue(item, null) + "<br>")
+                    }
+                }
+                <hr />
+            //}
+        }
+
+    </div>
+</div>
+
+
