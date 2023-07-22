@@ -57,9 +57,9 @@ namespace TMDInvestment.Controllers
         [HttpGet("GetAccounts")]
         public IActionResult GetAccounts()
         {
-
             var results = (List<Accounts>)coinBaseService.GetAccounts(ref error);
-            if(results != null)
+            //var results = coinBaseService.GetAccounts(ref error);
+            if (results != null)
                 foreach (var item in results)
                 {
                     if (item.currency != "USD" && item.currency != "USDC")
@@ -115,7 +115,7 @@ namespace TMDInvestment.Controllers
         [HttpPost("PlaceOrder")]
         public IActionResult PlaceOrder([FromBody] dynamic order)
         {
-            var results = coinBaseService.PlaceOrder(order, ref error);
+            var results = CoinBaseService.PlaceOrder(order, ref error);
             return Ok(results);
         }
     }

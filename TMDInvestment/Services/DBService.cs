@@ -12,33 +12,33 @@ namespace TMDInvestment.Services
     public class DBService
     {
         private TMDInvestmentContext context;
-        private string _apikey = string.Empty;
-        private string _accountNo = string.Empty;
+        //private string _apikey = string.Empty;
+        //private string _accountNo = string.Empty;
         //private string _userName = string.Empty;
         private int _userId = 0;
-        private string _email = string.Empty;
-        private string _password = string.Empty;
+        //private string _email = string.Empty;
+        //private string _password = string.Empty;
         private IConfiguration TDAmeritradeAPI;
         //public Users user;
         public AccessKeys accessKeys;
         public DBService()
         {
-            context = new TMDInvestmentContext();
-            //user = GetTokens("raubou");
-            accessKeys = GetTokens(1);
+            //context = new TMDInvestmentContext();
+            //user = GetTokens("raubou");            
             IConfigurationBuilder builder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json");
             IConfigurationRoot configuration = builder.Build();
             TDAmeritradeAPI = configuration.GetSection("TDAmeritradeAPI");
             if (TDAmeritradeAPI != null)
             {
-                _apikey = TDAmeritradeAPI.GetSection("apikey").Value;
+                //_apikey = TDAmeritradeAPI.GetSection("apikey").Value;
                 //_baseUrl = TDAmeritradeAPI.GetSection("baseUrl").Value;
-                _accountNo = TDAmeritradeAPI.GetSection("accountNo").Value;
+                //_accountNo = TDAmeritradeAPI.GetSection("accountNo").Value;
                 //_userName = TDAmeritradeAPI.GetSection("userName").Value;
                 _userId = Convert.ToInt32(TDAmeritradeAPI.GetSection("userId").Value);
-                _email = TDAmeritradeAPI.GetSection("email").Value;
-                _password = TDAmeritradeAPI.GetSection("password").Value;
+                accessKeys = GetTokens(_userId);
+                //_email = TDAmeritradeAPI.GetSection("email").Value;
+                //_password = TDAmeritradeAPI.GetSection("password").Value;
                 //_token = TDAmeritradeAPI.GetSection("token").Value;
                 //_refreshToken = TDAmeritradeAPI.GetSection("refreshToken").Value;
             }
@@ -122,12 +122,12 @@ namespace TMDInvestment.Services
             return true;
         }
         //change to use access key DB
-        public bool SaveTokens(string token, string refreshToken)
+        public bool SaveTokens(string token, string refreshToken, string provider)
         {
             try
             {
                 context = new TMDInvestmentContext();
-                AccessKeys accessKeys = context.accessKeys.Where(x => x.UserId == _userId).FirstOrDefault();
+                AccessKeys accessKeys = context.accessKeys.Where(x => x.UserId == _userId && x.Provider == provider).FirstOrDefault();
                 if (accessKeys == null)
                 {
                     context.accessKeys.Add(new AccessKeys() { UserId = _userId, Token = token, RefreshToken = refreshToken, Provider = "TDAmeritrade" });
@@ -188,7 +188,7 @@ namespace TMDInvestment.Services
 
         public List<Coins> GetCoins()
         {
-            List<Coins> coins = new List<Coins>(); ;
+            List<Coins> coins = new List<Coins>();
             try
             {
                 context = new TMDInvestmentContext();

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TMDInvestment.Models;
 using TMDInvestment.Services;
+using TMDInvestments.Models;
 
 namespace TMDInvestment.Controllers
 {

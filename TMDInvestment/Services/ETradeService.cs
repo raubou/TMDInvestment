@@ -14,12 +14,17 @@ using TinyOAuth1;
 
 namespace TMDInvestment.Services
 {
-    public class ETradeService
+    public sealed class ETradeService
     {
         private string _apikey = string.Empty;
         private string _baseUrl = string.Empty;
         private string _apiSecret = string.Empty;
+        private string _authUrl = string.Empty;
         private IConfiguration EtradeAPI;
+        TinyOAuthConfig config;
+        TinyOAuth tinyOAuth;
+        private RequestTokenInfo RequestToken;
+        dynamic error;
         public ETradeService()
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
@@ -29,50 +34,75 @@ namespace TMDInvestment.Services
             if (EtradeAPI != null)
             {
                 _apikey = EtradeAPI.GetSection("sandBoxKey").Value;
-                _baseUrl = EtradeAPI.GetSection("sandBoxURL").Value;
+                //_baseUrl = EtradeAPI.GetSection("sandBoxURL").Value;
+                _baseUrl = EtradeAPI.GetSection("baseURL").Value;
                 _apiSecret = EtradeAPI.GetSection("sandBoxSecret").Value;
-
+                _authUrl = EtradeAPI.GetSection("authURL").Value;
                 //_apikey = EtradeAPI.GetSection("productionKey").Value;
                 //_baseUrl = EtradeAPI.GetSection("baseURL").Value;
                 //_apiSecret = EtradeAPI.GetSection("productionSecret").Value;
-                //_passPhase = EtradeAPI.GetSection("passPhase").Value;
-                //WebUtility.UrlEncode
-                //HttpUtility.UrlEncode
                 ETradeAuthenicator.oauth_consumer_key = _apikey;
                 ETradeAuthenicator.appSecret = _apiSecret;
-                ETradeAuthenicator.oauth_nonce = Guid.NewGuid().ToString().Replace("-","");
+                //ETradeAuthenicator.oauth_nonce = Guid.NewGuid().ToString().Replace("-","");
+                ETradeAuthenicator.oauth_nonce = ETradeAuthenicator.GetNonce().ToString();
                 ETradeAuthenicator.oauth_timestamp = ETradeAuthenicator.GetTimeStamp().ToString();
+                config = new TinyOAuthConfig
+                {
+                    //AccessTokenUrl = "https://api.provider.com/oauth/accessToken",
+                    //AuthorizeTokenUrl = "https://api.provider.com/oauth/authorize",
+                    //RequestTokenUrl = "https://api.provider.com/oauth/requestToken",
+                    //ConsumerKey = "CONSUMER_KEY",
+                    //ConsumerSecret = "CONSUMER_SECRET"
+
+                    //AccessTokenUrl = _baseUrl + "oauth/accessToken",
+                    AccessTokenUrl = _baseUrl + "oauth/access_Token",
+                    AuthorizeTokenUrl = _authUrl,
+                    //RequestTokenUrl = _baseUrl + "oauth/requestToken",
+                    RequestTokenUrl = _baseUrl + "oauth/request_token",
+                    ConsumerKey = _apikey,
+                    ConsumerSecret = _apiSecret
+                };
+                tinyOAuth = new TinyOAuth(config);
             }
         }
 
-        public async Task<AccessTokenInfo> CallCrap()
+        //public async Task<AccessTokenInfo> CallCrap()
+        public RequestTokenInfo GetRequestToken()
         {
             // *** Check if we have saved tokens already, if not do the following: ***
 
             // Set up the basic config parameters
-            var config = new TinyOAuthConfig
-            {
-                //AccessTokenUrl = "https://api.provider.com/oauth/accessToken",
-                //AuthorizeTokenUrl = "https://api.provider.com/oauth/authorize",
-                //RequestTokenUrl = "https://api.provider.com/oauth/requestToken",
-                //ConsumerKey = "CONSUMER_KEY",
-                //ConsumerSecret = "CONSUMER_SECRET"
+            string authorizationUrl = string.Empty;
+            //var config = new TinyOAuthConfig
+            //{
+            //    //AccessTokenUrl = "https://api.provider.com/oauth/accessToken",
+            //    //AuthorizeTokenUrl = "https://api.provider.com/oauth/authorize",
+            //    //RequestTokenUrl = "https://api.provider.com/oauth/requestToken",
+            //    //ConsumerKey = "CONSUMER_KEY",
+            //    //ConsumerSecret = "CONSUMER_SECRET"
 
-                AccessTokenUrl = _baseUrl + "oauth/accessToken",
-                AuthorizeTokenUrl = _baseUrl + "oauth/authorize",
-                RequestTokenUrl = _baseUrl + "oauth/requestToken",
-                ConsumerKey = _apikey,
-                ConsumerSecret = _apiSecret
-            };
+            //    //AccessTokenUrl = _baseUrl + "oauth/accessToken",
+            //    AccessTokenUrl = _baseUrl + "oauth/access_Token",
+            //    AuthorizeTokenUrl = _authUrl,
+            //    //RequestTokenUrl = _baseUrl + "oauth/requestToken",
+            //    RequestTokenUrl = _baseUrl + "oauth/request_token",
+            //    ConsumerKey = _apikey,
+            //    ConsumerSecret = _apiSecret
+            //};
 
             // Use the library
-            var tinyOAuth = new TinyOAuth(config);
+            //var tinyOAuth = new TinyOAuth(config);
 
             // Get the request token and request token secret
-            var requestTokenInfo = await tinyOAuth.GetRequestTokenAsync();
+            var requestTokenInfo = tinyOAuth.GetRequestTokenAsync().Result;
 
-            // Construct the authorization url
-            var authorizationUrl = tinyOAuth.GetAuthorizationUrl(requestTokenInfo.RequestToken);
+            if (requestTokenInfo.RequestToken == null || requestTokenInfo.RequestTokenSecret == null)
+                authorizationUrl = requestTokenInfo.Error;
+            else
+                 // Construct the authorization url
+                authorizationUrl = tinyOAuth.GetAuthorizationUrl(requestTokenInfo.RequestToken);
+
+            requestTokenInfo.AuthorizationUrl = authorizationUrl;
 
             // *** You will need to implement these methods yourself ***
             //await LaunchWebBrowserAsync(authorizationUrl); // Use Process.Start(authorizationUrl), LaunchUriAsync(new Uri(authorizationUrl)) etc...
@@ -80,6 +110,37 @@ namespace TMDInvestment.Services
 
             // *** Important: Do not run this code before visiting and completing the authorization url ***
             //var accessTokenInfo = await tinyOAuth.GetAccessTokenAsync(requestTokenInfo.RequestToken, requestTokenInfo.RequestTokenSecret, verificationCode);
+            //var accessTokenInfo = await tinyOAuth.GetAccessTokenAsync(requestTokenInfo.RequestToken, requestTokenInfo.RequestTokenSecret);
+            //return accessTokenInfo;
+            return requestTokenInfo;
+        }
+
+        public dynamic Quote(string symbol)
+        {
+            RequestToken = GetRequestToken();
+            string url = _baseUrl + "v1/market/quote/" + symbol;
+            var results = APIProxy<dynamic>.Get(url, RequestToken.RequestToken, ref error);
+            if (results == null || error != null)
+            {
+                return error;
+            }
+            return results;
+        }
+
+        public dynamic Search(string search)
+        {
+            RequestToken = GetRequestToken();
+            string url = _baseUrl + "v1/market/lookup/" + search;
+            var results = APIProxy<dynamic>.Get(url, RequestToken.RequestToken, ref error);
+            if (results == null || error != null)
+            {
+                return error;
+            }
+            return results;
+        }
+
+        public async Task<AccessTokenInfo> GetAuthorizationToken(RequestTokenInfo requestTokenInfo)
+        {
             var accessTokenInfo = await tinyOAuth.GetAccessTokenAsync(requestTokenInfo.RequestToken, requestTokenInfo.RequestTokenSecret);
             return accessTokenInfo;
         }
@@ -93,10 +154,10 @@ namespace TMDInvestment.Services
             {
                 request = GetAuthenicatedRequest(HttpMethod.Get, _baseUrl + url, null, ref error);
                 results = APIProxy<dynamic>.Send(request, ref error);
-                //if (results == null || Errors.HasErrors(error))
-                //{
-                //    return error;
-                //}
+                if (results == null || error != null)
+                {
+                    return error;
+                }
             }
             catch (Exception ex)
             {
@@ -104,7 +165,17 @@ namespace TMDInvestment.Services
             }
             return results;
         }
-
+        /// <summary>
+        /// Authorization: OAuth realm="",oauth_callback="oob",
+        /// oauth_signature="FjoSQaFDKEDK1FJazlY3xArNflk%3D", oauth_nonce="LTg2ODUzOTQ5MTEzMTY3MzQwMzE%3D",
+        /// oauth_signature_method="HMAC-SHA1",oauth_consumer_key="282683cc9e4b8fc81dea6bc687d46758",
+        /// oauth_timestamp="1273254425"
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="url"></param>
+        /// <param name="model"></param>
+        /// <param name="error"></param>
+        /// <returns></returns>
         private HttpRequestMessage GetAuthenicatedRequest(HttpMethod method, string url, dynamic model, ref dynamic error)
         {
             JsonSerializerOptions options = new JsonSerializerOptions

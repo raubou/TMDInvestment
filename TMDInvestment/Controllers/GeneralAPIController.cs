@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TMDInvestment.Models;
 using TMDInvestment.Services;
 
 namespace TMDInvestment.Controllers
@@ -36,25 +37,43 @@ namespace TMDInvestment.Controllers
         }
 
         [HttpGet("GetCoins")]
-        public IActionResult GetCoins()
+        public async Task<IActionResult> GetCoins()
         {
-            var results = service.GetCoins();
-            foreach (var coin in results)
+            //List<Coins> results = null;
+            List<Coins> coins = service.GetCoins();
+            dynamic history = null;
+            dynamic ticker = null;
+            dynamic orders = null;
+
+            foreach (var coin in coins)
             {
-                var history = coinBaseService.GetHistoricData(coin.Coin.Trim(), DateTime.Now.AddDays(-10).Date, DateTime.Now.Date, ref error);
-                if (history is List<Models.HistoricData>)
-                    coin.history = history;
-                coin.ticker = coinBaseService.GetProductTicker(coin.Coin.Trim(), "ticker", ref error);
-                var orders = coinBaseService.GetOrder(coin.Coin, ref error);
-                if (orders is List<Models.Order>)
-                    coin.order = orders;
-                if (coin.order != null && coin.order.Count > 0)
-                    foreach (var order in coin.order)
-                    {
-                        order.fills = coinBaseService.GetFills(order.id, ref error);
-                    }
+
+                var task1 = Task.Run(() => {
+                    history = coinBaseService.GetHistoricData(coin.Coin.Trim().ToUpper(), DateTime.Now.AddDays(-20).Date, DateTime.Now.Date, ref error);
+                    if (history is List<HistoricData> && history.Count > 0)
+                        coin.history = ((List<HistoricData>)history).OrderByDescending(x => x.time).ToList();
+                });
+
+                var task2 = Task.Run(() => {
+                    ticker = coinBaseService.GetProductTicker(coin.Coin.Trim().ToUpper(), "ticker", ref error);
+                    if (ticker is Ticker)
+                        coin.ticker = ticker;
+                });
+
+                var task3 = Task.Run(() => {
+                    orders = coinBaseService.GetOrder(coin.Coin.Trim().ToUpper(), ref error);
+                    if (orders is List<Order>)
+                        coin.order = ((List<Order>)orders).OrderByDescending(x => x.created_at).ToList();
+                    if (coin.order != null && coin.order.Count > 0)
+                        foreach (var order in coin.order)
+                        {
+                            order.fills = coinBaseService.GetFills(order.id.Trim(), ref error);
+                        }
+                });
+                await Task.WhenAll(task1, task2, task3);
             }
-            return Ok(results);
+
+            return Ok(coins);
         }
 
         //[HttpGet("SaveCoin/{coin}/{description}")]

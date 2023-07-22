@@ -1,13 +1,373 @@
 ﻿@using System.Reflection;
-@model dynamic;
+@using TMDInvestment.Models;
+@using TMDInvestment.Services;
+@using TMDInvestments.Models;
+@model List<Accounts>;
 @{
     ViewData["Title"] = "CoinBaseAccount";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    List<Coins> coins = (List<Coins>)ViewBag.coins;
+    const decimal SELLFEE = .005m;
+    const decimal SELLMARGINDECIMAL = .017m;
+    const decimal BUYAMOUNT = 10M;
+    const decimal STOPLOSSMARGIN = .03m;
+    const decimal STOPLOSSAMOUNT = 30m;
+    const decimal MAXMINRESERVEPERCENT = .05m;
+    const int MAXAMOUNTOFPOSITIONS = 3;
+    const int MAXDAYSFORHOLDINGS = 3;
+    decimal SellTicker = 0M;
+    decimal currentPrice = 0M;
+    decimal avgLossPercent = 0M;
+    decimal avgGainPercent = 0M;
+    decimal avgLossChange = 0M;
+    decimal avgGainChange = 0M;
+    decimal RSIstepone = 0M;
+    decimal sma = 0M;
+    decimal smaClose = 0M;
+    decimal ema = 0M;
+    List<string> positions = new List<string>();
+
+    List<Coins> availCoins = new List<Coins>();
+    decimal AccountBalance = 0;
+    decimal AvailiableForTrade = 0;
+    decimal AmountPerTrade = 0;
+    decimal TotalinEquities = 0;
+    int maxCoinsAvailForTrade = 0;
+    decimal minReserve = 0;
+    TradeDirection direction;
+    bool isGaining = false;
+
+    if ((Model == null || Model.Count() <= 0) || (coins == null || coins.Count() <= 0))
+    {
+        Console.WriteLine("Accounts or Coins has returned null");
+    }
+    else
+    {
+        //Get Current Positions
+        positions = Model?.Where(x => x.currency != "USD" && x.currency != "USDC" && x.currentAmount > 5m).Select(x => x.currency.Trim().ToUpper() + "-USD").ToList();
+
+        //Get Amount Availiabe for Trade
+        //amtAvailForTrade = (positions.Count >= 5) ? 0 : (int)settings.MaxRoundTradesPerDay - positions.Count;
+        maxCoinsAvailForTrade = (positions.Count >= MAXAMOUNTOFPOSITIONS) ? 0 : (MAXAMOUNTOFPOSITIONS - positions.Count);
+
+        //Get Coins Availiable for Trade  / list of coins that are not already trading
+        availCoins = coins.Where(x => !positions.Contains(x.Coin.Trim().ToUpper())).ToList();
+        //availCoins = coins.Where(x => !positions.Contains(x.Coin)).Take(maxCoinsAvailForTrade).ToList();
+
+        //Show Setting
+        //Reflection<AccountInfo>.GetAllProperties(settings);
+
+        //get balance/availiabe for trade and current crypto holdings
+        var bal = (Model).Where(x => x?.currency == "USD").FirstOrDefault();
+        var avails = (Model).Where(x => (x?.currency != "USD" && x?.currency != "USDC"));
+        AvailiableForTrade = Convert.ToDecimal((bal?.balance ?? "0"));
+
+        //Get balance of all equities in account / Value of current trades + Amount Availiable for Trade
+        TotalinEquities = avails.Sum(x => Convert.ToDecimal((x?.available ?? "0")) * Convert.ToDecimal((x?.ticker?.price ?? "0")));
+        AccountBalance = TotalinEquities + AvailiableForTrade;
+        minReserve = AccountBalance * MAXMINRESERVEPERCENT;
+        if (AvailiableForTrade > minReserve)
+        {
+            //prevent divide by zero
+            if (maxCoinsAvailForTrade != 0)
+                AmountPerTrade = decimal.Round((AvailiableForTrade - minReserve) / maxCoinsAvailForTrade, 2);
+        }
+    }
 }
 
-<h1>Coin Base Account</h1>
 
-<div class="text-body-fixed-49-390">
+<h1>Coin Base Account</h1>
+<div class="card border-primary mb-3">
+    <div class="card-header"><b>Account Balances</b></div>
+    <div class="card-body text-primary">
+        <h5 class="card-title">
+            Your total acount balance <b style="color:green">$@Math.Round(AccountBalance, 2)</b>
+        </h5>
+
+        <h5 class="card-title">
+            Your total in Equities <b style="color:green">$@Math.Round(TotalinEquities, 2)</b>
+        </h5>
+
+        <h5 class="card-title">
+            Your current cash balance availiable trade is <b style="color:green">$@Math.Round(AvailiableForTrade, 2)</b>
+        </h5>
+
+        <h5 class="card-title">
+            Minium reserve amt <b style="color:green">$@Math.Round(minReserve, 2)</b>
+        </h5>
+
+        <h5 class="card-title">
+            Amount per Trade <b style="color:green">$@Math.Round(AmountPerTrade, 2)</b>
+        </h5>
+
+        <h5 class="card-title">
+            Commodities availiable for trade <b style="color:green">@maxCoinsAvailForTrade</b>
+        </h5>
+
+        <h5 class="card-title">Expected Gain Percent with Fee %<b style="color:green">$@Math.Round((SELLMARGINDECIMAL * 100) + (SELLFEE * 100), 2)</b></h5>
+    </div>
+</div>
+
+
+@if (coins.Count > 0)
+    foreach (var coin in coins)
+    {
+        <div id="cardMain-@coin.Coin" class="card mb-3" style="width:48%;margin:0px auto;float:left;margin-right:5px;">
+            <div class="card-header"><b>@coin.Description.ToUpper() - @coin.Coin.ToUpper()</b></div>
+            <div id="cardBody-@coin.Coin" class="card-body">
+                @if (coin.ticker != null && coin.history != null && coin.history.Count > 0)
+                {
+                    //Last ticker price of coin
+                    currentPrice = Convert.ToDecimal(coin.ticker.price);
+
+                    //foreach(var item in coin.history)
+                    //{
+                    //    Console.WriteLine("Price change from " + item.time + " $" + item.close);
+                    //    Console.WriteLine("Amount change from " + item.time + " $" + item.change + " percent change %" + (item.percent * 100));
+                    //}
+
+                    <h5 class="card-title">Current Price <b style="color:green">$@coin.ticker.price</b> at @coin.ticker.time</h5>
+
+                    //Generally, when the RSI indicator crosses 30 on the RSI chart,
+                    //it is a bullish sign and when it crosses 70, it is a bearish sign.
+                    //Put another way, one can interpret that RSI values of 70 or above
+                    //indicate that a security is becoming overbought or overvalued.
+                    //It may be primed for a trend reversal or corrective price pullback.
+                    //An RSI reading of 30 or below indicates an oversold or undervalued condition.
+                    //buy at oversold levels, bullish, above 50
+                    //selling opportunities when the price becomes overbought, bearish, below 50
+
+                    //To Do Bollinger Bands Calculation Formulas
+                    //* Middle Band = 20 - day simple moving average(SMA)
+                    //* Upper Band = 20 - day SMA + (20 - day standard deviation of price x 2)
+                    //*Lower Band = 20 - day SMA - (20 - day standard deviation of price x 2)
+
+                    //Exponential Moving Average (EMA)
+                    //EMA = (K x(C - P)) +P
+                    //Where:
+                    //C = Current Price
+                    //P = Previous periods EMA(A SMA is used for the first periods calculations)
+                    //K = Exponential smoothing constant usually 2
+
+                    //Use the EMA to determine trend direction, and trade in that direction.
+                    //When the EMA rises, you may want to consider buying when prices dip near or just below the EMA.
+                    //When the EMA falls, you may consider selling when prices rally towards or just above the EMA.
+
+                    avgLossPercent = Math.Abs((coin.history.Where(x => x.percent < 0).Average(x => x.percent) * 100));
+                    avgGainPercent = Math.Abs((coin.history.Where(x => x.percent > 0).Average(x => x.percent) * 100));
+                    avgLossChange = Math.Abs((coin.history.Where(x => x.change < 0).Average(x => x.change)));
+                    avgGainChange = Math.Abs((coin.history.Where(x => x.change > 0).Average(x => x.change)));
+
+                    //Calculate RSI
+                    RSIstepone = 100 - (100 / (1 + (avgGainPercent / avgLossPercent)));
+                    //calculate simple moving average
+                    sma = (coin.history.Sum(x => (x.low + x.high + x.close + x.open) / 4) / coin.history.Count());
+                    //Moving standard average for deviation
+                    smaClose = (coin.history.Sum(x => x.close / coin.history.Count()));
+                    //Exponential Moving Average (EMA)
+                    ema = (2 * (currentPrice - smaClose)) + smaClose;
+
+                    //if ((avgGainChange > avgLossChange) && (avgGainPercent > avgLossPercent) && (RSIstepone > 50) && (ema > currentPrice) && (avgGainPercent >= ((SELLMARGINDECIMAL * 100) + (SELLFEE * 100))))
+                    //if ((avgGainChange > avgLossChange) && (avgGainPercent > avgLossPercent) && (RSIstepone > 50) && (ema > currentPrice) && (avgGainChange >= BUYAMOUNT))
+                    //    Console.ForegroundColor = ConsoleColor.Green;
+                    //else
+                    //    Console.ForegroundColor = ConsoleColor.Red;
+
+                    //Console.WriteLine("Coin Name " + coin.Coin);
+                    //Console.WriteLine("Last Price $" + currentPrice + " at " + coin.ticker.time);
+                    <h5 class="card-title">RSI Indicator <b>@Math.Round(RSIstepone, 2)</b></h5>
+                    <h5 class="card-title">
+                        Average Loss Percent <b>%@Math.Round(avgLossPercent, 2)</b>
+                    </h5>
+                    <h5 class="card-title">
+                        Average Gain Percent <b>%@Math.Round(avgGainPercent, 2)</b>
+                    </h5>
+
+                    <h5 class="card-title">
+                        Average Loss Change <b>$@Math.Round(avgLossChange, 2)</b>
+                    </h5>
+
+                    <h5 class="card-title">
+                        Average Gain Change <b>$@Math.Round(avgGainChange, 2)</b>
+                    </h5>
+
+                    <h5 class="card-title">
+                        Simple Moving Average <b>$@Math.Round(sma, 2)</b>
+                    </h5>
+
+                    <h5 class="card-title">
+                        Simple Moving Average Close <b>$@Math.Round(smaClose, 2)</b>
+                    </h5>
+
+                    <h5 class="card-title">
+                        Exponential Moving Average Close <b>$@Math.Round(ema, 2)</b>
+                    </h5>
+
+
+                    //Check if coin is already brought
+                    //and deal with existing trades
+                    Accounts areadyTradingCoin = Model.Find(x => x.currency == coin.Coin.Trim().ToUpper().Replace("-USD", ""));
+                    if (areadyTradingCoin != null && areadyTradingCoin.order != null && areadyTradingCoin.order.Count > 0 && areadyTradingCoin.currentAmount > 5 && areadyTradingCoin.order[0].fills != null && areadyTradingCoin.order[0].fills.Count > 0)
+                    {
+                        int daysSincePurchase = (DateTime.UtcNow - areadyTradingCoin.order[0].created_at).Days;
+                        //deal with existing trades
+                        //Console.ForegroundColor = ConsoleColor.Blue;
+                            //Console.WriteLine(Environment.NewLine);
+                        <br />
+                        <h5 class="card-title">Is existing trade</h5>
+                        <h5 class="card-title">
+                            Purchase Date <b>@areadyTradingCoin.order[0].created_at</b>
+                        </h5>
+                        <h5 class="card-title">
+                            Purchase Price <b>$@areadyTradingCoin.broughtTicker</b>
+                        </h5>
+                        <h5 class="card-title">
+                            Current Price <b>$@areadyTradingCoin.ticker.price</b>
+                        </h5>
+                        <h5 class="card-title">
+                            Purchase Value <b>$@areadyTradingCoin.broughtAmount</b>
+                        </h5>
+                        <h5 class="card-title">
+                            Current Value <b>$@areadyTradingCoin.currentAmount</b>
+                        </h5>
+                        <h5 class="card-title">
+                            Days Since Purchase <b>@daysSincePurchase</b>
+                        </h5>
+                        <h5 class="card-title">
+                            Max Days to Hold <b>@MAXDAYSFORHOLDINGS</b>
+                        </h5>
+
+                        decimal changePercent;
+                        decimal changeAmount;
+                        //bool isGaining = false;
+                        if (areadyTradingCoin.broughtAmount < areadyTradingCoin.currentAmount)
+                        {
+                            changeAmount = areadyTradingCoin.currentAmount - areadyTradingCoin.broughtAmount;
+                            changePercent = ((changeAmount / areadyTradingCoin.broughtAmount) * 100);
+                            //Console.ForegroundColor = ConsoleColor.Green;
+                            <h5 class="card-title">
+                                Current gain amount $<b>@changeAmount</b>
+                            </h5>
+                            <h5 class="card-title">
+                                Current gain percent %<b>@changePercent</b>
+                            </h5>
+                            isGaining = true;
+                        }
+                        else
+                        {
+                            changeAmount = areadyTradingCoin.broughtAmount - areadyTradingCoin.currentAmount;
+                            changePercent = ((changeAmount / areadyTradingCoin.broughtAmount) * 100);
+                            //Console.ForegroundColor = ConsoleColor.Red;
+                            <h5 class="card-title">
+                                Current loss value $<b>@changeAmount</b>
+                            </h5>
+                            <h5 class="card-title">
+                                Current loss amount %<b>@changePercent</b>
+                            </h5>
+                        }
+
+                        //if (
+                        //    (
+                        //    isGaining &&
+                        //    (changePercent >= ((SELLMARGINDECIMAL + SELLFEE) * 100)) &&
+                        //    (areadyTradingCoin?.broughtAmount < areadyTradingCoin?.currentAmount)
+                        //    )
+                        //    ||
+                        //    (
+                        //    (((STOPLOSSMARGIN * 100) <= changePercent) ||
+                        //    (STOPLOSSAMOUNT <= changeAmount)) &&
+                        //    (daysSincePurchase > MAXDAYSFORHOLDINGS)
+                        //    )
+                        //    )
+                        //{
+                        //    direction = TradeDirection.sell;
+                        //    Console.WriteLine(direction.ToString() + " " + coin.Coin + " at " + Convert.ToDecimal(areadyTradingCoin.ticker.price) + " for " + areadyTradingCoin.currentAmount + " brought ticker " + areadyTradingCoin.broughtTicker + " with MARGIN of " + SELLMARGINDECIMAL + " Brought w FEEs for " + areadyTradingCoin.broughtAmount);
+                        //    Console.WriteLine($"Stop Loss Margin Percent %{(STOPLOSSMARGIN * 100)}. Actual %{changePercent}. Stop Loss Margin Amount ${STOPLOSSAMOUNT}. Actual ${changeAmount}");
+                        //    //var order = CoinBaseClient.TradeCoinbase(_client, coin.Coin,Math.Round(areadyTradingCoin.currentAmount, 2).ToString(), direction);
+                        //    //var order = CoinBaseService.PlaceOrder(order, ref error);
+                        //    //if (order != null && order.product_id != null)
+                        //    //{
+                        //    //    Console.WriteLine("Order successfull for sale of " + order.product_id);
+                        //    //}
+                        //    //else
+                        //    //{
+                        //    //    Console.WriteLine("Order failed for " + coin.Coin);
+                        //    //}
+
+                        //}
+                        ////else if(((STOPLOSSMARGIN * 100) >= changePercent) || (STOPLOSSAMOUNT >= changeAmount))
+                        //else
+                        //{
+                        //    //Console.WriteLine("Cannot Sell " + coin.Coin + " at " + Convert.ToDecimal(areadyTradingCoin?.ticker?.price) + " for " + areadyTradingCoin?.currentAmount + " Brought w FEEs for " + areadyTradingCoin?.broughtAmount + " at ticker " + areadyTradingCoin?.broughtTicker + " current amount with MARGIN and FEE of %" + ((SELLMARGINDECIMAL + SELLFEE) * 100) + " should be " + (areadyTradingCoin?.broughtAmount + (areadyTradingCoin?.broughtAmount * SELLMARGINDECIMAL) + (areadyTradingCoin?.broughtAmount * SELLFEE)) + " or higher.");
+                        //    //Console.WriteLine($"Stop Loss Margin Percent %{(STOPLOSSMARGIN * 100)}. Actual %{changePercent}. Stop Loss Margin Amount ${STOPLOSSAMOUNT}. Actual ${changeAmount}");
+                        //}
+                    }
+                    //else
+                    //{
+                    //    //continue;
+                    //    //only trade availCoin to trade. otherwise skip it.
+                    //    var evalCoin = availCoins.Where(x => x.Coin == coin.Coin).FirstOrDefault();
+                    //    //evaluate historic data
+                    //    //do evaluation if true than trade
+                    //    if (evalCoin != null)
+                    //    {
+                    //        if (CoinBaseService.AnalyzeCoin(evalCoin))
+                    //        {
+                    //            //try a new trade
+                    //            if (AmountPerTrade >= 10 && maxCoinsAvailForTrade > 0)
+                    //            {
+                    //                direction = TradeDirection.buy;
+                    //                Console.WriteLine(direction.ToString() + " " + evalCoin.Coin + " at " + evalCoin.ticker.price + " for " + AmountPerTrade);
+                    //                //var order = CoinBaseClient.TradeCoinbase(_client, evalCoin.Coin, AmountPerTrade.ToString(), direction);
+                    //                var order = CoinBaseService.PlaceOrder(order, ref error);
+                    //                if (order != null)
+                    //                {
+                    //                    Console.WriteLine("Order successfull for buy of " + evalCoin.Coin);
+                    //                    if (maxCoinsAvailForTrade != 0) { maxCoinsAvailForTrade--; }
+                    //                }
+                    //                else
+                    //                {
+                    //                    Console.WriteLine("Order failed for " + evalCoin.Coin);
+                    //                }
+                    //            }
+                    //            else
+                    //            {
+                    //                Console.WriteLine("Not enough fund to trade " + evalCoin.Coin + " at " + Convert.ToDecimal(evalCoin.ticker.price));
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            Console.WriteLine("Current Ticker for " + evalCoin.Coin + " at " + Convert.ToDecimal(evalCoin.ticker.price) + ". Previous history open " + coin.history[0].open + " on date " + coin.history[0].time + ", Last Sale Price " + SellTicker + ". Last balance amount " + areadyTradingCoin?.currentAmount + ". Skip Trading. ");
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        Console.ForegroundColor = ConsoleColor.Red;
+                    //        Console.WriteLine(coin.Coin + " Not availiable for trade due to rule");
+                    //        Console.ForegroundColor = ConsoleColor.Green;
+                    //    }
+                    //}
+                }
+                else
+                {
+                    Console.WriteLine("Ticker and/or History for " + coin.Coin + " Not found. Skipping.");
+                }
+            </div>
+        </div>
+        <script type="text/javascript">
+            if ((@avgGainChange > @avgLossChange) && (@avgGainPercent > @avgLossPercent) && (@RSIstepone > 50) && (@ema > @currentPrice) && (@avgGainChange >= @BUYAMOUNT)) {
+                $("#cardMain-@coin.Coin").addClass("border-success");
+                $("#cardBody-@coin.Coin").addClass("text-success");
+            }
+            else {
+                $("#cardMain-@coin.Coin").addClass("border-danger");
+                $("#cardBody-@coin.Coin").addClass("text-danger");
+            }
+        </script>
+
+    }
+
+@*<div class="text-body-fixed-49-390">
     <h4>Account Balances</h4>
     @foreach (var accountItem in Model.Accounts)
     {
@@ -30,12 +390,6 @@
                     @Html.Raw("<br><h4>Ticker</h4>")
                     @Html.Raw("<b>" + item.Name + ": </b>" + tickerItem?.price + "<br>")
                 }
-                @*else if (item.Name == "trades")
-                {
-                    var tradeItem = item.GetValue(accountItem, null);
-                    @Html.Raw("<br><h4>Trades</h4>")
-                    @Html.Raw("<b>" + item.Name + ": </b>" + tradeItem?.price + "<br>")
-                }*@
                 else
                 {
                     @Html.Raw("<b>" + item.Name + ": </b>" + item.GetValue(accountItem, null) + "<br>")
@@ -87,7 +441,6 @@
                         {
                             @Html.Raw("<b>" + fillItem.Name + ": </b>" + fillItem.GetValue(fill, null) + "<br>")
                         }
-                        @*<hr />*@
                     }
                 }
             }
@@ -95,10 +448,10 @@
             {
                 @Html.Raw("<b>" + item.Name + ": </b>" + item.GetValue(order, null) + "<br>")
             }
-            @*<hr />*@
+
         }
         <hr />
     }
 </div>
-
+*@
 

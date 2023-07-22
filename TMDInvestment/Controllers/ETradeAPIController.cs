@@ -10,7 +10,7 @@ namespace TMDInvestment.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ETradeAPIController : Controller
+    public sealed class ETradeAPIController : Controller
     {
         private ETradeService Service;
         //private dynamic error;
@@ -25,14 +25,22 @@ namespace TMDInvestment.Controllers
 
         [HttpGet("GetRequestToken")]
         public IActionResult GetRequestToken()
+        {        
+            var results = Service.GetRequestToken();
+            return Ok(results);
+        }
+
+        [HttpGet("Quote/{symbol}")]
+        public IActionResult Lookup(string symbol)
         {
-            //dynamic results;
-            //var results = Service.GetRequestToken(ref error);
-            //if (results == null || error != null || Errors.HasErrors(error))
-            //{
-            //    return BadRequest(error);
-            //}            
-            var results = Service.CallCrap();
+            var results = Service.Quote(symbol);
+            return Ok(results);
+        }
+
+        [HttpGet("Search/{search}")]
+        public IActionResult Search(string search)
+        {
+            var results = Service.Search(search);
             return Ok(results);
         }
     }

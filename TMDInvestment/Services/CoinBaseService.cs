@@ -16,14 +16,15 @@ using TMDInvestment.Models;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using TMD.Coinbase.PricePrediction.Helpers;
+using System.Runtime.Intrinsics.X86;
 
 namespace TMDInvestment.Services
 {
-    public class CoinBaseService
+    public sealed class CoinBaseService
     {
         private string _apikey = string.Empty;
-        private string _baseUrl = string.Empty;
-        private string _apiSecret = string.Empty;
+        private static string _baseUrl = string.Empty;
+        private static string _apiSecret = string.Empty;
         private string _passPhase = string.Empty;
         private string _url = string.Empty;
         private IConfiguration CoinBaseProAPI;
@@ -128,7 +129,7 @@ namespace TMDInvestment.Services
             return results;
         }
 
-        public dynamic PlaceOrder(dynamic model, ref dynamic error)
+        public static dynamic PlaceOrder(dynamic model, ref dynamic error)
         {
             dynamic results = new ExpandoObject();
             string url = "/orders";
@@ -313,7 +314,7 @@ namespace TMDInvestment.Services
             return results;
         }
 
-        private string GetTimeStamp(ref dynamic error)
+        private static string GetTimeStamp(ref dynamic error)
         {
             string url = "/time";
             dynamic results;
@@ -333,7 +334,7 @@ namespace TMDInvestment.Services
             return request;
         }
 
-        private HttpRequestMessage GetAuthenicatedRequest(HttpMethod method, string url, dynamic model, ref dynamic error)
+        private static HttpRequestMessage GetAuthenicatedRequest(HttpMethod method, string url, dynamic model, ref dynamic error)
         {
             JsonSerializerOptions options = new JsonSerializerOptions
             {
@@ -371,6 +372,41 @@ namespace TMDInvestment.Services
             request.Headers.Add("Accept", "application/json");
             request.Content = new StringContent(jsonString, Encoding.UTF8, "application/json");
             return request;
+        }
+
+        public static bool AnalyzeCoin(Coins coin,decimal avgGainChange,decimal avgLossChange,decimal avgGainPercent,decimal avgLossPercent,decimal currentPrice,decimal ema,decimal BUYAMOUNT,int RSIstepone, ref decimal SellTicker)
+        {
+            bool buy = false;
+            decimal priceatLastFill = 0m;
+            DateTime dateofLastOrder = DateTime.MinValue;
+            DateTime lastOrderDate = DateTime.MinValue;
+
+            SellTicker = (coin.order != null && coin.order.Count > 0 && coin.order[0].fills != null) ? coin.order[0].fills.Where(x => x.side == "sell").Sum(x => Convert.ToDecimal(x.price)) : 0m;
+            lastOrderDate = (coin.order != null && coin.order.Count > 0) ? DateTime.Parse(coin.order[0].done_at) : DateTime.MinValue;
+
+            //if ((avgGainChange > avgLossChange) && (avgGainPercent > avgLossPercent) && (RSIstepone > 50) && (ema > currentPrice) && (avgGainPercent >= ((SELLMARGINDECIMAL * 100) + (SELLFEE * 100))))
+            if ((avgGainChange >= BUYAMOUNT) && (avgGainChange > avgLossChange) && (avgGainPercent > avgLossPercent) && (RSIstepone >= 50) && (ema >= currentPrice))
+            {
+                buy = true;
+            }
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine("Avg for Symbol " + coin.Coin);
+            Console.WriteLine($"Current Price ${currentPrice}");
+            Console.WriteLine("Last order date " + lastOrderDate);
+
+            if (coin.order != null && coin.order.Count > 0 && coin.order[0].fills != null)
+            {
+                priceatLastFill = decimal.Round(coin.order.Average(x => x.fills.Average(y => Convert.ToDecimal(y.price))), 2);
+                dateofLastOrder = DateTime.Parse(coin.order[0].done_at);
+                Console.WriteLine("Avg Price at last Order " + priceatLastFill + " at Date Time " + dateofLastOrder);
+            }
+            else
+            {
+                Console.WriteLine("Previous order not found for " + coin.Coin);
+            }
+            Console.WriteLine(Environment.NewLine);
+            return buy;
         }
     }
 }

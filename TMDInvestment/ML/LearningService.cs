@@ -11,6 +11,7 @@ using Microsoft.ML.Transforms;
 using TMDInvestment.Models;
 using TMDInvestment.Services;
 using Microsoft.ML.Transforms.TimeSeries;
+using TMDInvestments.Models;
 
 namespace TMDInvestment.ML
 {

@@ -89,20 +89,32 @@ namespace TMDInvestment.Helpers
             }
         }
 
-        public static int GetTimeStamp()
+        //public static int GetTimeStamp()
+        //{
+        //    int secondsSinceEpoch = 0;
+        //    try
+        //    {
+        //        TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+        //        secondsSinceEpoch = (int)t.TotalSeconds;
+        //        return secondsSinceEpoch;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //error = ex;
+        //    }
+        //    return secondsSinceEpoch;
+        //}
+        public static string GetNonce()
         {
-            int secondsSinceEpoch = 0;
-            try
-            {
-                TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
-                secondsSinceEpoch = (int)t.TotalSeconds;
-                return secondsSinceEpoch;
-            }
-            catch (Exception ex)
-            {
-                //error = ex;
-            }
-            return secondsSinceEpoch;
+            var rand = new Random();
+            var nonce = rand.Next(1000000000);
+            return nonce.ToString();
+        }
+
+        public static string GetTimeStamp()
+        {
+            var ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return Convert.ToInt64(ts.TotalSeconds).ToString();
         }
     }
 }

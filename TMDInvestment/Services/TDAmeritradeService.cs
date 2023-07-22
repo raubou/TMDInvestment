@@ -13,6 +13,7 @@ using System.Text;
 using TMDInvestment.Helpers;
 using System.Text.Json;
 using TMD.Coinbase.PricePrediction.Helpers;
+using TMDInvestments.Models;
 
 namespace TMDInvestment.Services
 {
@@ -24,8 +25,8 @@ namespace TMDInvestment.Services
         //private string _userName = string.Empty;
         //private string _email = string.Empty;
         //private string _password = string.Empty;
-        private string _token = string.Empty;
-        private string _refreshToken = string.Empty;
+        //private string _token = string.Empty;
+        //private string _refreshToken = string.Empty;
         private HttpContent _content;
         private IConfiguration TDAmeritradeAPI;
         //private TMDInvestmentContext context;
@@ -48,8 +49,8 @@ namespace TMDInvestment.Services
                 //_userName = TDAmeritradeAPI.GetSection("userName").Value;
                 //_email = TDAmeritradeAPI.GetSection("email").Value;
                 //_password = TDAmeritradeAPI.GetSection("password").Value;
-                _token = TDAmeritradeAPI.GetSection("token").Value;
-                _refreshToken = TDAmeritradeAPI.GetSection("refreshToken").Value;
+                //_token = TDAmeritradeAPI.GetSection("token").Value;
+                //_refreshToken = TDAmeritradeAPI.GetSection("refreshToken").Value;
             }
         }
         public dynamic GetAuthorizationToken(string code, string refreshToken, bool isRefreshToken, string redirect, ref dynamic error)
@@ -81,7 +82,7 @@ namespace TMDInvestment.Services
             if(!Errors.HasErrors(error))
             {
                 refresh_token = (isRefreshToken) ? refreshToken : ((JsonElement)response).GetProperty("refresh_token").GetString();
-                dbService.SaveTokens(((JsonElement)response).GetProperty("access_token").GetString(), refresh_token);
+                dbService.SaveTokens(((JsonElement)response).GetProperty("access_token").GetString(), refresh_token, "TDAMeritrade");
                 results.access_token = ((JsonElement)response).GetProperty("access_token").GetString();
                 results.refresh_token = refresh_token;
             }
@@ -191,7 +192,7 @@ namespace TMDInvestment.Services
             return results;
         }
 
-        public dynamic GetPositions(ref dynamic error)
+        public AccountPositions GetPositions(ref dynamic error)
         {
             //List<Positions> results;
             AccountPositions results;
@@ -206,13 +207,13 @@ namespace TMDInvestment.Services
                 var token = GetAuthorizationToken("", dbService.accessKeys.RefreshToken, true, "WatchList", ref error);
                 if (Errors.HasErrors(error))
                 {
-                    return error;
+                    return new AccountPositions();
                 }
                 error = null;
                 results = APIProxy<AccountPositions>.Get(url, token.access_token.ToString(), ref error);
                 if (results == null || Errors.HasErrors(error))
                 {
-                    return error;
+                    return new AccountPositions();
                 }
             }
             foreach(var item in ((AccountPositions)results).securitiesAccount.positions)

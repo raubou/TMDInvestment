@@ -157,7 +157,17 @@ window.onload = function () {
     TMDobject.Search = function (item) {
         var symbol = $.trim(item);
         var headers = { 'content-type': 'application/json' };
-        var response = JSON.parse(TMDobject.SendAjax('GET', '../api/TDAmeritradeAPI/GetQuote/' + symbol, headers, '', false, 'text'));
+        //var response = JSON.parse(TMDobject.SendAjax('GET', '../api/TDAmeritradeAPI/GetQuote/' + symbol, headers, '', false, 'text'));
+        var response = TMDobject.SendAjax('GET', '../api/TDAmeritradeAPI/GetQuote/' + symbol, headers, '', false, 'text')
+        //var response = TMDobject.SendAjax('GET', '../api/ETradeAPI/Search/' + symbol, headers, '', false, 'text')
+        //var response = TMDobject.SendAjax('GET', '../api/ETradeAPI/Quote/' + symbol, headers, '', false, 'text')
+        //alert(response);
+        if (response == undefined || response == 'undefined') {
+            response = { "symbol": symbol, "description": "symbol or company not found" };
+        }
+        else {
+            response = JSON.parse(response);
+        }
         $("#infoHeader").empty();
         $("#infoHeader").append(CreateInfoHeader(symbol, true, false));
         $('#infoWindowText').empty();
@@ -165,8 +175,12 @@ window.onload = function () {
         /*$('#infoWindowText').append('<div style=\'width: inherit; height: auto; margin: 0px auto; float: none; text-align: center; font-weight:bold; font-size:19px; border:1px solid #cacaca;\'>' + symbol.toUpperCase() + '</div>');*/
         $('#infoTitle').append(symbol.toUpperCase());
         //alert(response[symbol.toUpperCase()] + " " + symbol.toUpperCase());
-        for (var item in response[symbol.toUpperCase()]) {
-            $('#infoWindowText').append("<b>" + item + " : </b>" + response[symbol.toUpperCase()][item] + "<br>");
+        //alert(response + " " + symbol.toUpperCase());
+        //for (var item in response[symbol.toUpperCase()]) {
+        for (var item in response) {
+            //$('#infoWindowText').append("<b>" + item + " : </b>" + response[symbol.toUpperCase()][item] + "<br>");
+            if(item != 'symbol')
+                $('#infoWindowText').append("<b>" + item + " : </b>" + response[item] + "<br>");
         }        
         TMDobject.openItem('#infoWindow');
     }
@@ -229,6 +243,15 @@ window.onload = function () {
         output += (showHistory) ? '<button id = "btnClose" value = "OK" class="btn-sm-blue" onclick = "TMDobject.ShowHistory(\'' + symbol + '\')">History</button>&nbsp;' : '';
         output += (showSearch) ? '<button id="btnClose" value="OK" class="btn-sm-blue" onclick="TMDobject.Search(\'' + symbol + '\')">Info</button>&nbsp;' : '';
         return output;
+    }
+
+    TMDobject.CheckSubmit = function(e) {
+        if (e && e.keyCode == 13) {
+            //document.forms[0].submit();
+            //alert($('#txtSearch').val());
+            if ($.trim($('#txtSearch').val()) != '')
+                TMDobject.Search($.trim($('#txtSearch').val()));
+        }
     }
 
 })(TMDobject);

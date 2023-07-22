@@ -3,6 +3,7 @@ using TMD.Coinbase.PricePrediction.Helpers;
 using TMDInvestment.Helpers;
 using TMDInvestment.Models;
 using TMDInvestment.Services;
+using TMDInvestments.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

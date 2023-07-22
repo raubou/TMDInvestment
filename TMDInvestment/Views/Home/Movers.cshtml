@@ -18,7 +18,7 @@
             {
                 @Html.Raw("<b><a href=\"javascript:TMDobject.Search('" + item.symbol + "')\">" + item.symbol + "</a></b>" + "&nbsp");
                 @Html.Raw(item.description + "&nbsp");
-                <br />
+
                 @Html.Raw("<b>Price: </b>" + item.last.ToString("C2") + " &nbsp");
                 @Html.Raw("<b>Change: </b>" + "<span style='color:green'>" + item.change.ToString("P2") + "</span>" + "&nbsp");
                 @Html.Raw("<b>Volume: </b>" + item.totalVolume.ToString("N0") + "&nbsp<br>");
@@ -38,7 +38,7 @@
         {
             @Html.Raw("<b><a href=\"javascript:TMDobject.Search('" + item.symbol + "')\">" + item.symbol + "</a></b>" + "&nbsp");
             @Html.Raw(item.description + "&nbsp");
-            <br />
+
             @Html.Raw("<b>Price: </b>" + item.last.ToString("C2") + " &nbsp");
             @Html.Raw("<b>Change: </b>" + "<span style='color:red'>" + item.change.ToString("P2") + "</span>" + "&nbsp");
             @Html.Raw("<b>Volume: </b>" + item.totalVolume.ToString("N0") + "&nbsp<br>");

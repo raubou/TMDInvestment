@@ -39,9 +39,10 @@ namespace TMDInvestment.Controllers
             service.GetAuthorizationToken(code, "", false, "", ref error);
             if (Errors.HasErrors(error))
             {
-                return RedirectToAction("Error", "Hone");
+                return RedirectToAction("Error", "Home");
             }
-            return View();
+            //return View();
+            return RedirectToAction("Default");
         }
         //[Route("Account")]
         public IActionResult Account()
